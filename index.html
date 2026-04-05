@@ -199,37 +199,71 @@
     </section>
   </main>
 
-  <script>
-    async function copyImportFromFile(filePath, button, statusId) {
-      const status = document.getElementById(statusId);
-      const originalText = button.textContent;
+<script>
+  async function copyImportFromFile(filePath, button, statusId) {
+    const status = document.getElementById(statusId);
+    const originalText = button.textContent;
 
-      try {
-        const response = await fetch(filePath);
-        if (!response.ok) throw new Error("Failed to load import file");
-
-        const text = (await response.text()).trim();
-        if (!text) throw new Error("Import file is empty");
-
-        await navigator.clipboard.writeText(text);
-
-        button.textContent = "Copied";
-        if (status) status.textContent = "Import copied to clipboard.";
-
-        setTimeout(() => {
-          button.textContent = originalText;
-          if (status) status.textContent = "";
-        }, 1500);
-      } catch (error) {
-        button.textContent = "Failed";
-        if (status) status.textContent = "Could not copy import.";
-        setTimeout(() => {
-          button.textContent = originalText;
-          if (status) status.textContent = "";
-        }, 1500);
-        console.error(error);
+    try {
+      const response = await fetch(filePath);
+      if (!response.ok) {
+        throw new Error("Failed to load file: " + response.status);
       }
+
+      const text = (await response.text()).trim();
+      if (!text) {
+        throw new Error("Import file is empty");
+      }
+
+      let copied = false;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        } catch (err) {
+          copied = false;
+        }
+      }
+
+      if (!copied) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          copied = document.execCommand("copy");
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+
+      if (!copied) {
+        throw new Error("Clipboard copy was blocked");
+      }
+
+      button.textContent = "Copied";
+      if (status) status.textContent = "Import copied to clipboard.";
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        if (status) status.textContent = "";
+      }, 1500);
+
+    } catch (error) {
+      console.error(error);
+      button.textContent = "Failed";
+      if (status) status.textContent = error.message;
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        if (status) status.textContent = "";
+      }, 2500);
     }
-  </script>
-</body>
-</html>
+  }
+</script>
