@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vickman's Glorious UI</title>
+  <style>
+    :root {
+      --bg: #23293a;
+      --panel: #f3f3f3;
+      --text: #111;
+      --muted: #555;
+      --line: #cfcfcf;
+      --button: #000;
+      --button-text: #fff;
+      --button-hover: #222;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #262d40 0%, #2b3044 45%, #d99261 100%);
+      color: var(--text);
+      padding: 16px;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--panel);
+      min-height: calc(100vh - 32px);
+      padding: 48px 36px 56px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.2rem;
+    }
+
+    .subtitle {
+      margin: 0 0 36px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h2 {
+      margin: 0 0 18px;
+      font-size: 1.8rem;
+    }
+
+    .profile-box {
+      border: 1px solid var(--line);
+      background: #f8f8f8;
+      padding: 22px;
+    }
+
+    .profile-content {
+      display: block;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .preview-image {
+      width: 100%;
+      max-width: 320px;
+      display: block;
+      border: 1px solid var(--line);
+      background: #ddd;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .copy-btn {
+      appearance: none;
+      border: none;
+      background: var(--button);
+      color: var(--button-text);
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .copy-btn:hover {
+      background: var(--button-hover);
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 0.9rem;
+      min-height: 1.2em;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid #999;
+      margin: 32px 0;
+    }
+
+    @media (max-width: 800px) {
+      .page {
+        padding: 28px 18px 36px;
+      }
+
+      .button-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>Vickman's Glorious UI</h1>
+    <p class="subtitle">dont ask the streamer what horizontal and vertical is pls.</p>
+
+    <section class="section">
+      <h2>Vertical Profile</h2>
+      <div class="profile-box">
+        <div class="profile-content">
+          <div class="left-column">
+            <img
+              class="preview-image"
+              src="images/vertical-preview.png"
+              alt="Vertical profile preview"
+            />
+
+            <div class="button-row">
+              <button
+                class="copy-btn"
+                onclick="copyImportFromFile('imports/vertical-danders.txt', this, 'vertical-status')"
+              >
+                Danders Copy Button
+              </button>
+
+              <button
+                class="copy-btn"
+                onclick="copyImportFromFile('imports/vertical-unhalted.txt', this, 'vertical-status')"
+              >
+                Unhalted Copy Button
+              </button>
+            </div>
+
+            <div class="status" id="vertical-status"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr />
+
+    <section class="section">
+      <h2>Horizontal Profile</h2>
+      <div class="profile-box">
+        <div class="profile-content">
+          <div class="left-column">
+            <img
+              class="preview-image"
+              src="images/horizontal-preview.png"
+              alt="Horizontal profile preview"
+            />
+
+            <div class="button-row">
+              <button
+                class="copy-btn"
+                onclick="copyImportFromFile('imports/horizontal-danders.txt', this, 'horizontal-status')"
+              >
+                Danders Copy Button
+              </button>
+
+              <button
+                class="copy-btn"
+                onclick="copyImportFromFile('imports/horizontal-unhalted.txt', this, 'horizontal-status')"
+              >
+                Unhalted Copy Button
+              </button>
+            </div>
+
+            <div class="status" id="horizontal-status"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    async function copyImportFromFile(filePath, button, statusId) {
+      const status = document.getElementById(statusId);
+      const originalText = button.textContent;
+
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error("Failed to load import file");
+
+        const text = (await response.text()).trim();
+        if (!text) throw new Error("Import file is empty");
+
+        await navigator.clipboard.writeText(text);
+
+        button.textContent = "Copied";
+        if (status) status.textContent = "Import copied to clipboard.";
+
+        setTimeout(() => {
+          button.textContent = originalText;
+          if (status) status.textContent = "";
+        }, 1500);
+      } catch (error) {
+        button.textContent = "Failed";
+        if (status) status.textContent = "Could not copy import.";
+        setTimeout(() => {
+          button.textContent = originalText;
+          if (status) status.textContent = "";
+        }, 1500);
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
